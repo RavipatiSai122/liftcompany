@@ -1,26 +1,24 @@
-# Base image with Python 3.10
+# Base image
 FROM python:3.10-slim
 
-# Set environment variables
-ENV PYTHONDONTWRITEBYTECODE 1
-ENV PYTHONUNBUFFERED 1
-
-# Set work directory
+# Set working directory
 WORKDIR /app
 
 # Install system dependencies
 RUN apt-get update && apt-get install -y gcc build-essential
 
-# Copy requirements and install
-COPY backend/requirements.txt .
+# Copy requirements
+COPY requirements.txt .
+
+# Upgrade pip and install python dependencies
 RUN pip install --upgrade pip
 RUN pip install -r requirements.txt
 
-# Copy backend code
-COPY backend/ /app/
+# Copy the rest of the backend code
+COPY . /app
 
 # Expose port
-EXPOSE 8000
+EXPOSE $PORT
 
-# Command to run FastAPI
-CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8000"]
+# Run the app
+CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "$PORT"]
