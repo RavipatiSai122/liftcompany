@@ -1,11 +1,7 @@
-# ============================
-# 🚀 FASTAPI CHATBOT WITH PAGE CONTROL
-# ============================
-
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
-from langchain_cohere import ChatCohere
+import cohere
 
 app = FastAPI()
 
@@ -18,10 +14,8 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# ------------------- LLM -------------------
-llm = ChatCohere(
-    cohere_api_key="Q0E43l3hbG1y8zdhSkiU6DTaVMVFPTIqVEm7CCU9"
-)
+# ------------------- COHERE CLIENT -------------------
+co = cohere.Client("Q0E43l3hbG1y8zdhSkiU6DTaVMVFPTIqVEm7CCU9")
 
 # ------------------- SYSTEM PROMPT -------------------
 system_prompt = """
@@ -90,16 +84,16 @@ def ask_bot(req: ChatRequest):
                 "navigate": route
             }
 
-    # ------- NORMAL AI ANSWER -------
-    prompt = [
-        {"role": "system", "content": system_prompt},
-        {"role": "user", "content": req.question}
-    ]
+    # ------- AI CALL (FREE TIER SAFE) -------
+    final_prompt = f"{system_prompt}\nUser: {req.question}"
 
-    response = llm.invoke(prompt)
+    response = co.chat(
+        model="command-r7b-12-2024",
+        message=final_prompt
+    )
 
     return {
-        "answer": response.content,
+        "answer": response.text,
         "navigate": None
     }
 
